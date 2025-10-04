@@ -20,7 +20,6 @@ from app.view.settings_page.about_setting import about
 from app.view.settings_page.custom_setting import custom_setting
 from app.view.settings_page.pumping_handoff_setting import pumping_handoff_setting
 from app.view.settings_page.voice_engine_setting import voice_engine_settings
-from app.view.plugins.plugin_settings import PluginSettingsWindow
 
 
 class settings_Window(MSFluentWindow):
@@ -93,25 +92,6 @@ class settings_Window(MSFluentWindow):
         except Exception as e:
             logger.error(f"创建自定义设置界面失败: {e}")
             self.custom_settingInterface = None
-
-        # 根据设置决定是否创建"插件设置"界面
-        try:
-            settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                sidebar_settings = settings.get('sidebar', {})
-                plugin_settings_switch = sidebar_settings.get('show_plugin_settings_switch', 2)
-                
-                if plugin_settings_switch != 2:  # 不为"不显示"时才创建界面
-                    self.plugin_settingsInterface = PluginSettingsWindow(self)
-                    self.plugin_settingsInterface.setObjectName("plugin_settingsInterface")
-                    logger.info("插件设置界面创建成功")
-                else:
-                    logger.info("插件设置界面已设置为不创建")
-                    self.plugin_settingsInterface = None
-        except Exception as e:
-            logger.error(f"读取插件设置界面设置失败: {e}, 默认不创建界面")
-            self.plugin_settingsInterface = None
 
         try:
             self.pumping_handoff_settingInterface = pumping_handoff_setting(self)
@@ -205,33 +185,6 @@ class settings_Window(MSFluentWindow):
             self.addSubInterface(self.custom_settingInterface, get_theme_icon("ic_fluent_person_20_filled"), '个性设置', position=NavigationItemPosition.TOP)
         else:
             logger.error("自定义设置界面不存在，无法添加到导航栏")
-
-        # 添加插件设置导航项
-        try:
-            settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                sidebar_settings = settings.get('sidebar', {})
-                plugin_settings_switch = sidebar_settings.get('show_plugin_settings_switch', 2)
-                
-                if plugin_settings_switch == 1:
-                    if self.plugin_settingsInterface is not None:
-                        self.addSubInterface(self.plugin_settingsInterface, get_theme_icon("ic_fluent_database_plug_connected_20_filled"), '插件', position=NavigationItemPosition.BOTTOM)
-                        # logger.info("插件设置导航项已放置在底部导航栏")
-                    else:
-                        logger.error("插件设置界面未创建，无法添加到导航栏")
-                elif plugin_settings_switch == 2:
-                    logger.info("插件设置导航项已设置为不显示")
-                else:
-                    if self.plugin_settingsInterface is not None:
-                        self.addSubInterface(self.plugin_settingsInterface, get_theme_icon("ic_fluent_database_plug_connected_20_filled"), '插件', position=NavigationItemPosition.TOP)
-                        # logger.info("插件设置导航项已放置在顶部导航栏")
-                    else:
-                        logger.error("插件设置界面未创建，无法添加到导航栏")
-        except Exception as e:
-            logger.error(f"加载插件设置导航项失败: {e}")
-            if self.plugin_settingsInterface is not None:
-                self.addSubInterface(self.plugin_settingsInterface, get_theme_icon("ic_fluent_database_plug_connected_20_filled"), '插件', position=NavigationItemPosition.BOTTOM)
 
         # 添加语音设置导航项
         try:
@@ -383,43 +336,6 @@ class settings_Window(MSFluentWindow):
             except Exception as e:
                 logger.error(f"保存窗口大小设置失败: {e}")
     
-    def show_plugin_settings_interface(self):
-        """通过URL协议打开插件设置界面，让用户可以管理插件相关设置"""
-        logger.info("正在打开插件设置界面")
-        
-        try:
-            # 确保设置窗口可见
-            if not self.isVisible():
-                self.show()
-                self.activateWindow()
-                self.raise_()
-            
-            # 如果窗口最小化，则恢复
-            if self.isMinimized():
-                self.showNormal()
-            
-            # 检查插件设置界面是否存在
-            if self.plugin_settingsInterface is not None:
-                # 切换到插件设置界面
-                self.stackedWidget.setCurrentWidget(self.plugin_settingsInterface)
-                logger.info("插件设置界面已成功打开")
-            else:
-                logger.error("插件设置界面不存在，无法打开")
-                # 尝试重新创建插件设置界面
-                try:
-                    self.plugin_settingsInterface = PluginSettingsWindow(self)
-                    self.plugin_settingsInterface.setObjectName("plugin_settingsInterface")
-                    logger.info("插件设置界面重新创建成功")
-                    # 重新初始化导航
-                    self.initNavigation()
-                    # 切换到插件设置界面
-                    self.stackedWidget.setCurrentWidget(self.plugin_settingsInterface)
-                    logger.info("插件设置界面重新创建并成功打开")
-                except Exception as e:
-                    logger.error(f"重新创建插件设置界面失败: {e}")
-        except Exception as e:
-            logger.error(f"打开插件设置界面时发生异常: {e}")
-
     def apply_background_image(self):
         """检查设置中的 enable_settings_background 和 enable_settings_background_color，
         如果开启则应用设置界面背景图片或背景颜色"""

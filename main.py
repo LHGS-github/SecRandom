@@ -550,40 +550,6 @@ def clean_expired_data():
     clean_expired_reward_history()
     logger.info("已清理过期历史记录")
 
-def check_plugin_settings():
-    """检查插件自启动设置"""
-    # 检查是否有启动窗口线程
-    has_startup_thread = 'startup_thread' in globals() and startup_thread is not None and startup_thread.isRunning()
-    
-    try:
-        # 读取插件设置文件
-        plugin_settings_file = path_manager.get_settings_path('plugin_settings.json')
-        ensure_dir(plugin_settings_file.parent)
-        if file_exists(plugin_settings_file):
-            with open_file(plugin_settings_file, 'r') as f:
-                plugin_settings = json.load(f)
-                run_plugins_on_startup = plugin_settings.get('plugin_settings', {}).get('run_plugins_on_startup', False)
-                
-                if run_plugins_on_startup:
-                    from app.view.plugins.management import PluginManagementPage
-                    plugin_manager = PluginManagementPage()
-                    plugin_manager.start_autostart_plugins()
-                    logger.info("自启动插件功能已启动")
-                    if has_startup_thread:
-                        startup_thread.update_progress(detail="自启动插件功能已启动")
-                else:
-                    logger.info("插件自启动功能已禁用")
-                    if has_startup_thread:
-                        startup_thread.update_progress(detail="插件自启动功能已禁用")
-        else:
-            logger.error("插件设置文件不存在，跳过插件自启动")
-            if has_startup_thread:
-                startup_thread.update_progress(detail="插件设置文件不存在，跳过插件自启动")
-    except Exception as e:
-        logger.error(f"检查插件自启动设置失败: {e}")
-        if has_startup_thread:
-            startup_thread.update_progress(detail=f"检查插件自启动设置失败: {e}")
-
 async def create_main_window_async():
     """异步创建主窗口实例并根据设置决定是否显示窗口"""
     # 检查是否有启动窗口线程
@@ -679,10 +645,6 @@ async def async_init_application():
     if 'startup_thread' in globals() and startup_thread is not None and startup_thread.isRunning():
         startup_thread.set_step(4, "正在清理历史记录...")
     clean_expired_data()
-
-    if 'startup_thread' in globals() and startup_thread is not None and startup_thread.isRunning():
-        startup_thread.set_step(5, "正在检查插件设置...")
-    check_plugin_settings()
 
     # 异步执行注册URL协议
     await async_register_url_protocol()

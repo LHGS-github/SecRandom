@@ -48,32 +48,6 @@ warnings.filterwarnings('ignore', category=InsecureRequestWarning)
 settings_dir = path_manager.get_settings_path().parent
 ensure_dir(settings_dir)
 
-def show_update_notification(latest_version):
-    """显示自定义更新通知窗口"""
-    try:
-        from app.common.update_notification import UpdateNotification
-        import sys
-
-        # 确保有应用实例
-        if QApplication.instance() is None:
-            app = QApplication(sys.argv)
-        else:
-            app = QApplication.instance()
-
-        # 创建并显示通知窗口
-        notification = UpdateNotification(latest_version)
-        notification.show()
-        # 防止通知窗口关闭时程序退出
-        original_quit_setting = app.quitOnLastWindowClosed()
-        app.setQuitOnLastWindowClosed(False)
-        notification.destroyed.connect(lambda: app.setQuitOnLastWindowClosed(original_quit_setting))
-        logger.info(f"自定义更新通知已显示，版本: {latest_version}")
-
-    except ImportError as e:
-        logger.error(f"导入自定义通知失败: {str(e)}")
-    except Exception as e:
-        logger.error(f"显示更新通知失败: {str(e)}", exc_info=True)
-
 # ==================================================
 # 配置管理类
 # ==================================================
@@ -476,8 +450,6 @@ class Window(MSFluentWindow):
         
         # 初始化管理器
         self.config_manager = ConfigurationManager()
-        self.update_checker = UpdateChecker(self)
-        self.update_checker.update_available.connect(show_update_notification)
 
         # 初始化IPC服务器
         self.server = QLocalServer(self)
@@ -535,10 +507,6 @@ class Window(MSFluentWindow):
         # 应用背景图片
         self.apply_background_image()
 
-        # 检查更新
-        check_startup = self.config_manager.get_foundation_setting('check_on_startup')
-        if check_startup:
-            self.check_updates_async()
 
         self._position_window()
         self.createSubInterface()
@@ -861,12 +829,6 @@ class Window(MSFluentWindow):
                 logger.info("根据设置自动显示主窗口")
         except Exception as e:
             logger.error(f"加载窗口显示设置失败: {e}")
-
-    def check_updates_async(self):
-        """异步检查更新
-        异步执行版本检查任务，不会阻塞主线程"""
-        self.update_checker.check_for_updates()
-        logger.info("更新检查任务已启动")
 
     def createSubInterface(self):
         """创建子界面
@@ -1420,10 +1382,6 @@ class Window(MSFluentWindow):
             self.server.close()
             logger.info("IPC服务器已关闭")
 
-        # 停止更新检查
-        if hasattr(self, 'update_checker') and self.update_checker:
-            self.update_checker.stop_checking()
-            logger.info("更新检查已停止")
             
         # 关闭共享内存
         if hasattr(self, 'shared_memory'):
@@ -1527,11 +1485,6 @@ class Window(MSFluentWindow):
         if hasattr(self, 'server'):
             self.server.close()
             logger.info("IPC服务器已关闭")
-        
-        # 停止更新检查
-        if hasattr(self, 'update_checker') and self.update_checker:
-            self.update_checker.stop_checking()
-            logger.info("更新检查已停止")
 
         # 关闭共享内存
         if hasattr(self, 'shared_memory'):
@@ -2037,84 +1990,6 @@ class Window(MSFluentWindow):
                 self.levitation_window.raise_()
         
         logger.info("浮窗界面已成功打开")
-    
-    def show_plugin_settings_window(self):
-        """通过URL协议显示插件设置窗口
-        通过URL协议打开插件设置界面，检查是否跳过安全验证"""
-        if self._is_non_class_time():
-            try:
-                enc_settings_path = path_manager.get_enc_set_path()
-                with open_file(enc_settings_path, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-                    if settings.get('hashed_set', {}).get('start_password_enabled', False) == True:
-                        from app.common.password_dialog import PasswordDialog
-                        dialog = PasswordDialog(self)
-                        if dialog.exec_() != QDialog.Accepted:
-                            logger.error("用户取消在课间调用URL使用抽取功能")
-                            return
-            except Exception as e:
-                logger.error(f"密码验证失败: {e}")
-                return
-        
-        # 检查是否跳过安全验证
-        skip_security = False
-        try:
-            settings_path = path_manager.get_settings_path('fixed_url_settings.json')
-            if path_manager.file_exists(settings_path):
-                with open_file(settings_path, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
-                    fixed_url_settings = settings.get('fixed_url', {})
-                    skip_security = fixed_url_settings.get('plugin_settings_open_url_skip_security', False)
-        except Exception as e:
-            logger.error(f"读取跳过安全验证设置失败: {e}")
-        
-        # 如果没有设置跳过安全验证，则进行密码验证
-        if not skip_security:
-            # 确保设置窗口存在
-            if not hasattr(self, 'settingInterface') or not self.settingInterface:
-                from app.view.settings import settings_Window
-                self.settingInterface = settings_Window(self)
-            
-            # 调用设置窗口的插件设置界面方法
-            self.settingInterface.show_plugin_settings_interface()
-        else:
-            # 跳过安全验证，直接创建并显示设置窗口，然后切换到插件设置界面
-            if not hasattr(self, 'settingInterface') or not self.settingInterface:
-                from app.view.settings import settings_Window
-                self.settingInterface = settings_Window(self)
-            
-            # 确保设置窗口可见
-            if not self.settingInterface.isVisible():
-                self.settingInterface.show()
-                self.settingInterface.activateWindow()
-                self.settingInterface.raise_()
-            
-            # 如果窗口最小化，则恢复
-            if self.settingInterface.isMinimized():
-                self.settingInterface.showNormal()
-            
-            # 检查插件设置界面是否存在
-            if self.settingInterface.plugin_settingsInterface is not None:
-                # 切换到插件设置界面
-                self.settingInterface.stackedWidget.setCurrentWidget(self.settingInterface.plugin_settingsInterface)
-                logger.info("插件设置界面已成功打开")
-            else:
-                logger.error("插件设置界面不存在，无法打开")
-                # 尝试重新创建插件设置界面
-                try:
-                    from app.view.plugins.plugin_settings import PluginSettingsWindow
-                    self.settingInterface.plugin_settingsInterface = PluginSettingsWindow(self.settingInterface)
-                    self.settingInterface.plugin_settingsInterface.setObjectName("plugin_settingsInterface")
-                    logger.info("插件设置界面重新创建成功")
-                    # 重新初始化导航
-                    self.settingInterface.initNavigation()
-                    # 切换到插件设置界面
-                    self.settingInterface.stackedWidget.setCurrentWidget(self.settingInterface.plugin_settingsInterface)
-                    logger.info("插件设置界面重新创建并成功打开")
-                except Exception as e:
-                    logger.error(f"重新创建插件设置界面失败: {e}")
-        
-        logger.info("插件设置界面已成功打开")
     
     def start_pumping_selection(self):
         """通过URL参数启动抽选功能

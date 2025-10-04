@@ -25,7 +25,6 @@ class LevitationWindow(QWidget):
         super().__init__(parent)
         self.app_dir = path_manager._app_root
         self._load_settings()  # 加载配置
-        self._load_plugin_settings()  # 加载插件设置
         self._init_ui_components()  # 初始化UI组件
         self._setup_event_handlers()  # 设置事件处理器
         self._init_drag_system()  # 初始化拖动系统
@@ -62,19 +61,6 @@ class LevitationWindow(QWidget):
         self.transparency_mode = max(0, min(self.transparency_mode / 100, 1))
         self.button_arrangement_mode = max(0, min(self.button_arrangement_mode, 2))
         self.floating_icon_mode = max(0, min(self.floating_icon_mode, 2))
-
-    def _load_plugin_settings(self):
-        # 小鸟游星野：加载插件设置
-        settings_path = path_manager.get_settings_path('plugin_settings.json')
-        try:
-            ensure_dir(settings_path.parent)
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                plugin_settings = settings.get('plugin_settings', {})
-                self.selected_plugin = plugin_settings.get('selected_plugin', '主窗口')
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            self.selected_plugin = '主窗口'
-            logger.error(f"加载插件设置失败: {e}")
 
     def _is_non_class_time(self):
         """检测当前时间是否在非上课时间段
@@ -1147,140 +1133,18 @@ class LevitationWindow(QWidget):
 
     # 白露：处理人物标签点击事件（忽略事件参数）
     def on_people_clicked(self, event=None): 
-        # 获取当前选中的插件
-        self._load_plugin_settings()
-        selected_plugin = self.selected_plugin
-        logger.info(f"人物标签被点击，当前选中的插件: {selected_plugin}")
-        
-        if selected_plugin and selected_plugin != "主窗口":
-            # 加载并打开选中的插件窗口
-            self._open_plugin_window(selected_plugin)
-        else:
-            # 如果没有选中插件或选中的是主窗口插件，查找主窗口
-            main_window = None
-            for widget in QApplication.topLevelWidgets():
-                if hasattr(widget, 'toggle_window'):  # 通过特征识别主窗口
-                    main_window = widget
-                    break
+        # 如果没有选中插件或选中的是主窗口插件，查找主窗口
+        main_window = None
+        for widget in QApplication.topLevelWidgets():
+            if hasattr(widget, 'toggle_window'):  # 通过特征识别主窗口
+                main_window = widget
+                break
 
-            if main_window:
-                main_window.toggle_window()
-            else:
-                logger.error("未找到主窗口实例")
-                self.show_connection_error_dialog()
-    
-    def _open_plugin_window(self, plugin_name):
-        """打开指定插件的窗口"""
-        # 获取插件目录
-        plugin_dir = path_manager.get_plugin_path("plugin")
-        
-        # 查找插件信息
-        plugin_info = None
-        plugin_path = None
-        
-        # 遍历插件目录，查找匹配的插件
-        if path_manager.file_exists(plugin_dir):
-            for folder in os.listdir(plugin_dir):
-                folder_path = os.path.join(plugin_dir, folder)
-                if os.path.isdir(folder_path):
-                    info_file = os.path.join(folder_path, "plugin.json")
-                    if path_manager.file_exists(info_file):
-                        try:
-                            with open_file(info_file, "r", encoding="utf-8") as f:
-                                info = json.load(f)
-                                if info.get("name") == plugin_name:
-                                    plugin_info = info
-                                    plugin_path = folder_path
-                                    break
-                        except Exception as e:
-                            logger.error(f"读取插件信息文件失败: {e}")
-                            continue
-        
-        if not plugin_info or not plugin_path:
-            logger.error(f"未找到插件: {plugin_name}")
-            error_dialog = Dialog("插件未找到", f"未找到插件: {plugin_name}", self)
-            error_dialog.yesButton.setText("确定")
-            error_dialog.cancelButton.hide()
-            error_dialog.buttonLayout.insertStretch(1)
-            error_dialog.exec()
-            return
-        
-            # 获取插件入口文件路径
-        entry_point = plugin_info.get("entry_point", "main.py")
-        plugin_file_path = path_manager.get_plugin_path(f"plugin/{os.path.basename(plugin_path)}/{entry_point}")
-            
-        if not path_manager.file_exists(plugin_file_path):
-            logger.error(f"插件 {plugin_name} 的入口文件 {entry_point} 不存在")
-            error_dialog = Dialog("文件不存在", f"插件 {plugin_name} 的入口文件 {entry_point} 不存在", self)
-            error_dialog.yesButton.setText("确定")
-            error_dialog.cancelButton.hide()
-            error_dialog.buttonLayout.insertStretch(1)
-            error_dialog.exec()
-            return
-        
-        logger.info(f"正在加载插件: {plugin_name}")
-        
-        try:
-            # 使用importlib动态导入插件
-            spec = importlib.util.spec_from_file_location(f"plugin_{plugin_info.get('folder_name', plugin_name)}", plugin_file_path)
-            if spec is None or spec.loader is None:
-                raise ImportError(f"无法加载插件文件: {plugin_file_path}")
-            
-            plugin_module = importlib.util.module_from_spec(spec)
-            
-            # 添加插件目录到sys.path，以便插件可以导入自己的模块
-            if plugin_path not in sys.path:
-                sys.path.insert(0, plugin_path)
-            
-            # 添加插件专属site-packages目录到sys.path，以便插件可以使用安装的依赖
-            plugin_site_packages = path_manager.get_plugin_path(f"plugin/{os.path.basename(plugin_path)}/site-packages")
-            if path_manager.file_exists(plugin_site_packages) and plugin_site_packages not in sys.path:
-                sys.path.insert(0, plugin_site_packages)
-                logger.info(f"已添加插件专属site-packages到Python路径: {plugin_site_packages}")
-            
-            # 尝试加载模块
-            try:
-                spec.loader.exec_module(plugin_module)
-                logger.info(f"成功加载插件模块: {plugin_name}")
-                
-                # 检查插件是否有设置界面函数
-                if hasattr(plugin_module, 'show_dialog'):
-                    logger.info(f"调用插件主函数: {plugin_name}")
-                    plugin_module.show_dialog(self)
-                else:
-                    # 如果没有标准函数，显示提示
-                    info_dialog = Dialog("插件信息", f"插件 {plugin_name} 已成功加载，但没有提供标准的设置界面函数", self)
-                    info_dialog.yesButton.setText("确定")
-                    info_dialog.cancelButton.hide()
-                    info_dialog.buttonLayout.insertStretch(1)
-                    info_dialog.exec()
-                    
-            except ImportError as ie:
-                # 处理导入错误，可能是缺少依赖库
-                logger.error(f"插件 {plugin_name} 导入失败: {ie}")
-                error_dialog = Dialog("加载失败", f"无法加载插件 {plugin_name}: {str(ie)}\n请检查插件是否缺少必要的依赖库", self)
-                error_dialog.yesButton.setText("确定")
-                error_dialog.cancelButton.hide()
-                error_dialog.buttonLayout.insertStretch(1)
-                error_dialog.exec()
-                    
-            except Exception as e:
-                # 处理其他异常
-                logger.error(f"插件 {plugin_name} 执行失败: {e}")
-                error_dialog = Dialog("执行失败", f"插件 {plugin_name} 执行失败: {str(e)}", self)
-                error_dialog.yesButton.setText("确定")
-                error_dialog.cancelButton.hide()
-                error_dialog.buttonLayout.insertStretch(1)
-                error_dialog.exec()
-                
-        except Exception as e:
-            # 处理模块加载失败
-            logger.error(f"无法加载插件 {plugin_name}: {e}")
-            error_dialog = Dialog("加载失败", f"无法加载插件 {plugin_name}: {str(e)}", self)
-            error_dialog.yesButton.setText("确定")
-            error_dialog.cancelButton.hide()
-            error_dialog.buttonLayout.insertStretch(1)
-            error_dialog.exec()
+        if main_window:
+            main_window.toggle_window()
+        else:
+            logger.error("未找到主窗口实例")
+            self.show_connection_error_dialog()
 
     def start_drag(self, event=None):
         # 白露：开始拖动逻辑 - 使用鼠标按下的全局位置作为起始位置
