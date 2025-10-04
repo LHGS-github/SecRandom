@@ -19,8 +19,6 @@ from app.view.settings_page.password_setting import password_set
 from app.view.settings_page.about_setting import about
 from app.view.settings_page.custom_setting import custom_setting
 from app.view.settings_page.pumping_handoff_setting import pumping_handoff_setting
-from app.view.settings_page.voice_engine_setting import voice_engine_settings
-
 
 class settings_Window(MSFluentWindow):
     # 定义个性化设置变化信号
@@ -52,9 +50,6 @@ class settings_Window(MSFluentWindow):
         self.setMinimumSize(600, 400)
         self.setWindowTitle('SecRandom - 设置')
         self.setWindowIcon(QIcon(str(path_manager.get_resource_path('icon', 'secrandom-icon.png'))))
-
-        # 应用背景图片
-        self.apply_background_image()
 
         # 获取主屏幕
         screen = QApplication.primaryScreen()
@@ -151,27 +146,6 @@ class settings_Window(MSFluentWindow):
             self.password_setInterface.setObjectName("password_setInterface")
             logger.info("安全设置界面创建成功")
 
-        # 根据设置决定是否创建"语音设置"界面
-        try:
-            settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                sidebar_settings = settings.get('sidebar', {})
-                voice_settings_switch = sidebar_settings.get('show_voice_settings_switch', 1)
-                
-                if voice_settings_switch != 2:  # 不为"不显示"时才创建界面
-                    self.voice_engine_settingsInterface = voice_engine_settings(self)
-                    self.voice_engine_settingsInterface.setObjectName("voice_engine_settingsInterface")
-                    logger.info("语音设置界面创建成功")
-                else:
-                    logger.info("语音设置界面已设置为不创建")
-                    self.voice_engine_settingsInterface = None
-        except Exception as e:
-            logger.error(f"读取语音设置界面设置失败: {e}, 默认创建界面")
-            self.voice_engine_settingsInterface = voice_engine_settings(self)
-            self.voice_engine_settingsInterface.setObjectName("voice_engine_settingsInterface")
-            logger.info("语音设置界面创建成功")
-
         self.initNavigation()
 
     def initNavigation(self):
@@ -185,33 +159,6 @@ class settings_Window(MSFluentWindow):
             self.addSubInterface(self.custom_settingInterface, get_theme_icon("ic_fluent_person_20_filled"), '个性设置', position=NavigationItemPosition.TOP)
         else:
             logger.error("自定义设置界面不存在，无法添加到导航栏")
-
-        # 添加语音设置导航项
-        try:
-            settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                sidebar_settings = settings.get('sidebar', {})
-                voice_settings_switch = sidebar_settings.get('show_voice_settings_switch', 1)
-                
-                if voice_settings_switch == 1:
-                    if self.voice_engine_settingsInterface is not None:
-                        self.addSubInterface(self.voice_engine_settingsInterface, get_theme_icon("ic_fluent_person_voice_20_filled"), '语音设置', position=NavigationItemPosition.BOTTOM)
-                        # logger.info("语音设置导航项已放置在底部导航栏")
-                    else:
-                        logger.error("语音设置界面未创建，无法添加到导航栏")
-                elif voice_settings_switch == 2:
-                    logger.info("语音设置导航项已设置为不显示")
-                else:
-                    if self.voice_engine_settingsInterface is not None:
-                        self.addSubInterface(self.voice_engine_settingsInterface, get_theme_icon("ic_fluent_person_voice_20_filled"), '语音设置', position=NavigationItemPosition.TOP)
-                        # logger.info("语音设置导航项已放置在顶部导航栏")
-                    else:
-                        logger.error("语音设置界面未创建，无法添加到导航栏")
-        except Exception as e:
-            logger.error(f"加载语音设置导航项失败: {e}")
-            if self.voice_engine_settingsInterface is not None:
-                self.addSubInterface(self.voice_engine_settingsInterface, get_theme_icon("ic_fluent_person_voice_20_filled"), '语音设置', position=NavigationItemPosition.BOTTOM)
 
         # 添加安全设置导航项
         try:
@@ -336,164 +283,7 @@ class settings_Window(MSFluentWindow):
             except Exception as e:
                 logger.error(f"保存窗口大小设置失败: {e}")
     
-    def apply_background_image(self):
-        """检查设置中的 enable_settings_background 和 enable_settings_background_color，
-        如果开启则应用设置界面背景图片或背景颜色"""
-        try:
-            # 读取自定义设置
-            custom_settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(custom_settings_path, 'r', encoding='utf-8') as f:
-                custom_settings = json.load(f)
-                
-            # 检查是否启用了设置界面背景图标
-            personal_settings = custom_settings.get('personal', {})
-            enable_settings_background = personal_settings.get('enable_settings_background', True)
-            enable_settings_background_color = personal_settings.get('enable_settings_background_color', False)
-            
-            # 优先应用背景颜色（如果启用）
-            if enable_settings_background_color:
-                settings_background_color = personal_settings.get('settings_background_color', '#FFFFFF')
-                
-                # 创建背景颜色标签并设置样式（使用标签方式，与图片保持一致）
-                self.background_label = QLabel(self)
-                self.background_label.setGeometry(0, 0, self.width(), self.height())
-                self.background_label.setStyleSheet(f"background-color: {settings_background_color};")
-                self.background_label.lower()  # 将背景标签置于底层
-                
-                # 设置窗口属性，确保背景可见
-                self.setAttribute(Qt.WA_TranslucentBackground)
-                self.setStyleSheet("background: transparent;")
-                
-                # 保存原始的resizeEvent方法
-                self.original_resizeEvent = self.resizeEvent
-                
-                # 重写resizeEvent方法，调整背景大小
-                self.resizeEvent = self._on_resize_event
-                
-                logger.info(f"已成功应用设置界面背景颜色 {settings_background_color}")
-                
-            # 如果背景颜色未启用，但背景图片启用了，则应用背景图片
-            elif enable_settings_background:
-                # 获取设置界面背景图片设置
-                settings_background_image = personal_settings.get('settings_background_image', '')
-                
-                # 检查是否选择了背景图片
-                if settings_background_image and settings_background_image != "无背景图":
-                    # 获取背景图片文件夹路径
-                    background_dir = path_manager.get_resource_path('images', 'background')
-                    
-                    # 检查文件夹是否存在
-                    if background_dir.exists():
-                        # 构建图片完整路径
-                        image_path = background_dir / settings_background_image
-                        
-                        # 检查图片文件是否存在
-                        if image_path.exists():
-                            # 创建背景图片对象
-                            background_pixmap = QPixmap(str(image_path))
-                            
-                            # 如果图片加载成功，应用背景
-                            if not background_pixmap.isNull():
-                                # 获取模糊度和亮度设置
-                                blur_value = personal_settings.get('background_blur', 10)
-                                brightness_value = personal_settings.get('background_brightness', 30)
-                                
-                                # 应用模糊效果
-                                if blur_value > 0:
-                                    # 创建模糊效果
-                                    blur_effect = QGraphicsBlurEffect()
-                                    blur_effect.setBlurRadius(blur_value)
-                                    
-                                    # 创建临时场景和图形项来应用模糊效果
-                                    scene = QGraphicsScene()
-                                    item = QGraphicsPixmapItem(background_pixmap)
-                                    item.setGraphicsEffect(blur_effect)
-                                    scene.addItem(item)
-                                    
-                                    # 创建渲染图像
-                                    result_image = QImage(background_pixmap.size(), QImage.Format_ARGB32)
-                                    result_image.fill(Qt.transparent)
-                                    painter = QPainter(result_image)
-                                    scene.render(painter)
-                                    painter.end()
-                                    
-                                    # 更新背景图片
-                                    background_pixmap = QPixmap.fromImage(result_image)
-                                
-                                # 应用亮度效果
-                                if brightness_value != 100:
-                                    # 创建图像副本
-                                    brightness_image = QImage(background_pixmap.size(), QImage.Format_ARGB32)
-                                    brightness_image.fill(Qt.transparent)
-                                    painter = QPainter(brightness_image)
-                                    
-                                    # 计算亮度调整因子
-                                    brightness_factor = brightness_value / 100.0
-                                    
-                                    # 应用亮度调整
-                                    painter.setOpacity(brightness_factor)
-                                    painter.drawPixmap(0, 0, background_pixmap)
-                                    painter.end()
-                                    
-                                    # 更新背景图片
-                                    background_pixmap = QPixmap.fromImage(brightness_image)
-                                
-                                # 创建背景标签并设置样式
-                                self.background_label = QLabel(self)
-                                self.background_label.setGeometry(0, 0, self.width(), self.height())
-                                self.background_label.setPixmap(background_pixmap.scaled(
-                                    self.width(), self.height(), 
-                                    Qt.IgnoreAspectRatio, 
-                                    Qt.SmoothTransformation
-                                ))
-                                self.background_label.lower()  # 将背景标签置于底层
-                                
-                                # 保存原始图片，用于窗口大小调整时重新缩放
-                                self.original_background_pixmap = background_pixmap
-                                
-                                # 确保背景标签随窗口大小变化
-                                self.background_label.setAttribute(Qt.WA_StyledBackground, True)
-                                
-                                # 设置窗口属性，确保背景可见
-                                self.setAttribute(Qt.WA_TranslucentBackground)
-                                self.setStyleSheet("background: transparent;")
-                                
-                                # 保存原始的resizeEvent方法
-                                self.original_resizeEvent = self.resizeEvent
-                                
-                                # 重写resizeEvent方法，调整背景大小
-                                self.resizeEvent = self._on_resize_event
-                                
-                                logger.info(f"已成功应用设置界面背景图片 {settings_background_image}，模糊度: {blur_value}，亮度: {brightness_value}%")
-                            else:
-                                logger.error(f"设置界面背景图片 {settings_background_image} 加载失败")
-                        else:
-                            logger.error(f"设置界面背景图片 {settings_background_image} 不存在")
-                    else:
-                        logger.error("背景图片文件夹不存在")
-                else:
-                    logger.info("未选择设置界面背景图片")
-            else:
-                # 如果两者都未启用，则使用默认背景
-                self.setStyleSheet("background: transparent;")
-                
-                # 清除可能存在的背景图片标签
-                if hasattr(self, 'background_label') and self.background_label:
-                    self.background_label.deleteLater()
-                    delattr(self, 'background_label')
-                
-                # 恢复原始的resizeEvent方法
-                if hasattr(self, 'original_resizeEvent'):
-                    self.resizeEvent = self.original_resizeEvent
-                    delattr(self, 'original_resizeEvent')
-                
-                # logger.debug("设置界面背景图片和颜色功能均未启用，使用默认背景")
-                
-        except FileNotFoundError:
-            logger.error("自定义设置文件不存在，使用默认设置")
-        except Exception as e:
-            logger.error(f"应用设置界面背景图片或颜色时发生异常: {e}")
-    
+
     def _on_resize_event(self, event):
         """当窗口大小改变时，自动调整背景图片大小，确保背景始终填满整个窗口"""
         # 调用原始的resizeEvent，确保布局正确更新
@@ -505,17 +295,6 @@ class settings_Window(MSFluentWindow):
         # 强制更新布局
         self.updateGeometry()
         self.update()
-        
-        # 如果存在背景标签，调整其大小
-        if hasattr(self, 'background_label') and self.background_label:
-            self.background_label.setGeometry(0, 0, self.width(), self.height())
-            # 使用保存的原始图片进行缩放，避免重复缩放导致的像素化
-            if hasattr(self, 'original_background_pixmap') and self.original_background_pixmap:
-                self.background_label.setPixmap(self.original_background_pixmap.scaled(
-                    self.width(), self.height(), 
-                    Qt.IgnoreAspectRatio, 
-                    Qt.SmoothTransformation
-                ))
         
         # 处理窗口最大化状态
         if self.isMaximized():

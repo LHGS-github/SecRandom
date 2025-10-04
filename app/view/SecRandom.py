@@ -31,7 +31,6 @@ from app.view.settings import settings_Window
 from app.view.main_page.pumping_people import pumping_people
 from app.view.main_page.pumping_reward import pumping_reward
 from app.view.main_page.history_handoff_setting import history_handoff_setting
-from app.view.main_page.vocabulary_learning import vocabulary_learning
 from app.view.levitation import LevitationWindow
 from app.view.settings_page.about_setting import about
 from app.common.about import ContributorDialog, DonationDialog
@@ -869,16 +868,6 @@ class Window(MSFluentWindow):
             object_name='history_handoff_settingInterface',
             log_name='历史交接设置',
             create_on_error=True
-        )
-        _create_interface(
-            attr_name='vocabulary_learningInterface',
-            class_type=vocabulary_learning,
-            sidebar_key='main_window_side_switch',
-            default_value=2,
-            object_name='vocabulary_learningInterface',
-            log_name='背单词',
-            create_on_error=False,
-            default_on_error=None
         )
         _create_interface(
             attr_name='pumping_peopleInterface',

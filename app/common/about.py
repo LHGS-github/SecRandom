@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 from app.common.config import YEAR, MONTH, AUTHOR, VERSION, APPLY_NAME, GITHUB_WEB, BILIBILI_WEB
-from app.common.update_notification import show_update_notification
 from app.common.config import get_theme_icon, load_custom_font, check_for_updates, get_update_channel, set_update_channel
 from app.common.path_utils import path_manager, open_file, remove_file
 

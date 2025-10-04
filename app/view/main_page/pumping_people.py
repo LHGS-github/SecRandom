@@ -17,7 +17,7 @@ system_random = SystemRandom()
 
 from app.common.config import get_theme_icon, load_custom_font, restore_volume, is_dark_theme
 from app.common.path_utils import path_manager, open_file, remove_file, ensure_dir
-from app.common.voice import TTSHandler
+
 
 is_dark = is_dark_theme(qconfig)
 
@@ -729,91 +729,6 @@ class pumping_people(QWidget):
 
             fade_out_animation.finished.connect(final_stop)
             fade_out_animation.start()
-
-    def _play_animation_music(self):
-        """播放动画背景音乐 ～(￣▽￣)～* 星野和白露的音乐时间"""
-        try:
-            BGM_ANIMATION_PATH = path_manager.get_resource_path("music", "pumping_people/Animation_music")
-            # 检查音乐目录是否存在
-            if not path_manager.file_exists(BGM_ANIMATION_PATH):
-                logger.error(f"音乐目录不存在: {BGM_ANIMATION_PATH}")
-                return
-
-            # 获取所有支持的音乐文件 (｡･ω･｡)ﾉ♡
-            music_extensions = ['*.mp3', '*.wav', '*.ogg', '*.flac']
-            music_files = []
-            for ext in music_extensions:
-                music_files.extend(glob.glob(os.path.join(BGM_ANIMATION_PATH, ext)))
-
-            if not music_files:
-                logger.error(f"音乐目录中没有找到音乐文件: {BGM_ANIMATION_PATH}")
-                return
-
-            # 随机选择一首音乐 ♪(^∇^*)
-            selected_music = random.choice(music_files)
-            logger.info(f"正在播放音乐: {selected_music}")
-
-            # 设置并播放音乐，准备渐入效果 ✧*｡٩(ˊᗜˋ*)و✧*｡
-            self.music_player.setMedia(QMediaContent(QUrl.fromLocalFile(selected_music)))
-            if self.music_player.mediaStatus() == QMediaPlayer.InvalidMedia:
-                logger.error(f"无效的媒体文件: {selected_music}")
-                return
-            self.music_player.setVolume(0)  # 初始音量设为0
-            self.music_player.play()
-            # 连接错误信号
-            self.music_player.error.connect(self.handle_media_error)
-            
-            # 创建音量渐入动画 ～(￣▽￣)～* 星野的魔法音量调节
-            self.fade_in_animation = QPropertyAnimation(self.music_player, b"volume")
-            self.fade_in_animation.setDuration(self.music_fade_in)
-            self.fade_in_animation.setStartValue(0)
-            self.fade_in_animation.setEndValue(self.animation_music_volume)
-            self.fade_in_animation.setEasingCurve(QEasingCurve.InOutQuad)
-            self.fade_in_animation.start()
-        except Exception as e:
-            logger.error(f"播放音乐时出错: {e}")
-
-    def handle_media_error(self, error):
-        """处理媒体播放错误 ～(T_T)～ 星野的音乐播放失败了"""
-        error_str = self.music_player.errorString()
-        logger.error(f"媒体播放错误: {error_str} (错误代码: {error})")
-        self.music_player.stop()
-
-    def voice_play(self):
-        """语音播报部分"""
-        try:
-            with open_file(path_manager.get_voice_engine_path(), 'r', encoding='utf-8') as f:
-                voice_config = json.load(f)
-                voice_engine = voice_config['voice_engine']['voice_engine']
-                edge_tts_voice_name = voice_config['voice_engine'] ['edge_tts_voice_name']
-                voice_enabled = voice_config['voice_engine']['voice_enabled']
-                system_volume_enabled = voice_config['voice_engine']['system_volume_enabled']
-                voice_volume = voice_config['voice_engine'].get('voice_volume', 100) / 100.0
-                voice_speed = voice_config['voice_engine'].get('voice_speed', 100)
-                volume_value = voice_config['voice_engine'].get('system_volume_value', 50)
-
-                if voice_enabled == True:  # 开启语音
-                    if system_volume_enabled == True: # 开启系统音量
-                        restore_volume(volume_value)
-                    tts_handler = TTSHandler()
-                    config = {
-                        'voice_enabled': voice_enabled,
-                        'voice_volume': voice_volume,
-                        'voice_speed': voice_speed,
-                        'system_voice_name': edge_tts_voice_name,
-                    }
-                    students_name = []
-                    for label in self.student_labels:
-                        parts = label.text().split()
-                        if len(parts) >= 2 and len(parts[-1]) == 1 and len(parts[-2]) == 1:
-                            name = parts[-2] + parts[-1]
-                        else:
-                            name = parts[-1]
-                        name = name.replace(' ', '')
-                        students_name.append(name)
-                    tts_handler.voice_play(config, students_name, voice_engine, edge_tts_voice_name)
-        except Exception as e:
-            logger.error(f"语音播报出错: {e}")
     
     # 根据抽取模式抽选学生
     def random(self):

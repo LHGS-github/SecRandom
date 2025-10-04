@@ -17,7 +17,6 @@ system_random = SystemRandom()
 
 from app.common.config import get_theme_icon, load_custom_font, restore_volume
 from app.common.path_utils import path_manager, open_file, remove_file, ensure_dir
-from app.common.voice import TTSHandler
 from app.common.message_sender import message_sender
 
 class instant_draw(QWidget):
@@ -793,42 +792,6 @@ class instant_draw(QWidget):
         error_str = self.music_player.errorString()
         logger.error(f"媒体播放错误: {error_str} (错误代码: {error})")
         self.music_player.stop()
-
-    def voice_play(self):
-        """语音播报部分"""
-        try:
-            with open_file(path_manager.get_voice_engine_path(), 'r', encoding='utf-8') as f:
-                voice_config = json.load(f)
-                voice_engine = voice_config['voice_engine']['voice_engine']
-                edge_tts_voice_name = voice_config['voice_engine'] ['edge_tts_voice_name']
-                voice_enabled = voice_config['voice_engine']['voice_enabled']
-                system_volume_enabled = voice_config['voice_engine']['system_volume_enabled']
-                voice_volume = voice_config['voice_engine'].get('voice_volume', 100) / 100.0
-                voice_speed = voice_config['voice_engine'].get('voice_speed', 100)
-                volume_value = voice_config['voice_engine'].get('system_volume_value', 50)
-
-                if voice_enabled == True:  # 开启语音
-                    if system_volume_enabled == True: # 开启系统音量
-                        restore_volume(volume_value)
-                    tts_handler = TTSHandler()
-                    config = {
-                        'voice_enabled': voice_enabled,
-                        'voice_volume': voice_volume,
-                        'voice_speed': voice_speed,
-                        'system_voice_name': edge_tts_voice_name,
-                    }
-                    students_name = []
-                    for label in self.student_labels:
-                        parts = label.text().split()
-                        if len(parts) >= 2 and len(parts[-1]) == 1 and len(parts[-2]) == 1:
-                            name = parts[-2] + parts[-1]
-                        else:
-                            name = parts[-1]
-                        name = name.replace(' ', '')
-                        students_name.append(name)
-                    tts_handler.voice_play(config, students_name, voice_engine, edge_tts_voice_name)
-        except Exception as e:
-            logger.error(f"语音播报出错: {e}")
     
     # 根据抽取模式抽选学生
     def random(self):

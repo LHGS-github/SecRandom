@@ -10,7 +10,6 @@ from qfluentwidgets import *
 from app.common.config import get_theme_icon, load_custom_font, check_for_updates, VERSION, is_dark_theme, themeColor
 from app.common.path_utils import path_manager
 from app.common.path_utils import open_file, ensure_dir
-from app.common.update_notification import UpdateNotification
 
 class URLHandler:
     """URL处理器类"""

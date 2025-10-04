@@ -76,74 +76,6 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
         self.pumping_reward_animation_interval_SpinBox.valueChanged.connect(self.save_settings)
         self.pumping_reward_animation_interval_SpinBox.setFont(QFont(load_custom_font(), 12))
 
-        # 自动播放次数
-        self.pumping_reward_animation_auto_play_SpinBox.setRange(1, 200)
-        self.pumping_reward_animation_auto_play_SpinBox.setValue(5)
-        self.pumping_reward_animation_auto_play_SpinBox.setSingleStep(5)
-        self.pumping_reward_animation_auto_play_SpinBox.setSuffix("次")
-        self.pumping_reward_animation_auto_play_SpinBox.valueChanged.connect(self.save_settings)
-        self.pumping_reward_animation_auto_play_SpinBox.setFont(QFont(load_custom_font(), 12))
-
-        # 动画音乐开关
-        self.pumping_reward_Animation_music_switch = SwitchButton()
-        self.pumping_reward_Animation_music_switch.setOnText("开启")
-        self.pumping_reward_Animation_music_switch.setOffText("关闭")
-        self.pumping_reward_Animation_music_switch.checkedChanged.connect(self.save_settings)
-        self.pumping_reward_Animation_music_switch.setFont(QFont(load_custom_font(), 12))
-
-        # 结果音乐开关
-        self.pumping_reward_result_music_switch = SwitchButton()
-        self.pumping_reward_result_music_switch.setOnText("开启")
-        self.pumping_reward_result_music_switch.setOffText("关闭")
-        self.pumping_reward_result_music_switch.checkedChanged.connect(self.save_settings)
-        self.pumping_reward_result_music_switch.setFont(QFont(load_custom_font(), 12))
-
-        # 动画音乐文件夹
-        self.pumping_reward_Animation_music_path_button = PushButton("动画音乐文件夹")
-        self.pumping_reward_Animation_music_path_button.setFont(QFont(load_custom_font(), 12))
-        self.pumping_reward_Animation_music_path_button.clicked.connect(lambda: self.open_music_path('Animation_music'))
-
-        # 结果音乐文件夹
-        self.pumping_reward_result_music_path_button = PushButton("结果音乐文件夹")
-        self.pumping_reward_result_music_path_button.setFont(QFont(load_custom_font(), 12))
-        self.pumping_reward_result_music_path_button.clicked.connect(lambda: self.open_music_path('result_music'))
-
-        # 动画音乐音量
-        self.pumping_reward_Animation_music_volume_SpinBox = SpinBox()
-        self.pumping_reward_Animation_music_volume_SpinBox.setRange(0, 100)
-        self.pumping_reward_Animation_music_volume_SpinBox.setValue(5)
-        self.pumping_reward_Animation_music_volume_SpinBox.setSingleStep(5)
-        self.pumping_reward_Animation_music_volume_SpinBox.setSuffix("%")
-        self.pumping_reward_Animation_music_volume_SpinBox.valueChanged.connect(self.save_settings)
-        self.pumping_reward_Animation_music_volume_SpinBox.setFont(QFont(load_custom_font(), 12))
-
-        # 结果音乐音量
-        self.pumping_reward_result_music_volume_SpinBox = SpinBox()
-        self.pumping_reward_result_music_volume_SpinBox.setRange(0, 100)
-        self.pumping_reward_result_music_volume_SpinBox.setValue(5)
-        self.pumping_reward_result_music_volume_SpinBox.setSingleStep(5)
-        self.pumping_reward_result_music_volume_SpinBox.setSuffix("%")
-        self.pumping_reward_result_music_volume_SpinBox.valueChanged.connect(self.save_settings)
-        self.pumping_reward_result_music_volume_SpinBox.setFont(QFont(load_custom_font(), 12))
-
-        # 渐入时间
-        self.pumping_reward_music_fade_in_SpinBox = SpinBox()
-        self.pumping_reward_music_fade_in_SpinBox.setRange(0, 1000)
-        self.pumping_reward_music_fade_in_SpinBox.setValue(300)
-        self.pumping_reward_music_fade_in_SpinBox.setSingleStep(100)
-        self.pumping_reward_music_fade_in_SpinBox.setSuffix("ms")
-        self.pumping_reward_music_fade_in_SpinBox.valueChanged.connect(self.save_settings)
-        self.pumping_reward_music_fade_in_SpinBox.setFont(QFont(load_custom_font(), 12))
-
-        # 渐出时间
-        self.pumping_reward_music_fade_out_SpinBox = SpinBox()
-        self.pumping_reward_music_fade_out_SpinBox.setRange(0, 1000)
-        self.pumping_reward_music_fade_out_SpinBox.setValue(300)
-        self.pumping_reward_music_fade_out_SpinBox.setSingleStep(100)
-        self.pumping_reward_music_fade_out_SpinBox.setSuffix("ms")
-        self.pumping_reward_music_fade_out_SpinBox.valueChanged.connect(self.save_settings)
-        self.pumping_reward_music_fade_out_SpinBox.setFont(QFont(load_custom_font(), 12))
-
         # 显示格式
         self.pumping_reward_display_format_comboBox = ComboBox()
         self.pumping_reward_display_format_comboBox.addItems([
@@ -155,39 +87,6 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
         self.pumping_reward_display_format_comboBox.currentIndexChanged.connect(self.save_settings)
         self.pumping_reward_display_format_comboBox.setFont(QFont(load_custom_font(), 12))
 
-        # 随机颜色
-        self.pumping_reward_student_name_color_comboBox = ComboBox()
-        self.pumping_reward_student_name_color_comboBox.addItems([
-            "关闭",
-            "随机颜色",
-            "固定颜色"
-        ])
-        self.pumping_reward_student_name_color_comboBox.setCurrentIndex(0)
-        self.pumping_reward_student_name_color_comboBox.currentIndexChanged.connect(self.save_settings)
-        self.pumping_reward_student_name_color_comboBox.setFont(QFont(load_custom_font(), 12))
-
-        # 固定颜色按钮-动画
-        self.pumping_reward_animation_color_fixed_dialog_button = PushButton("动画固定颜色")
-        self.pumping_reward_animation_color_fixed_dialog_button.setFont(QFont(load_custom_font(), 12))
-        self.pumping_reward_animation_color_fixed_dialog_button.clicked.connect(lambda: self.on_color_animation_dialog())
-
-        # 固定颜色按钮-结果
-        self.pumping_reward_result_color_fixed_dialog_button = PushButton("结果固定颜色")
-        self.pumping_reward_result_color_fixed_dialog_button.setFont(QFont(load_custom_font(), 12))
-        self.pumping_reward_result_color_fixed_dialog_button.clicked.connect(lambda: self.on_color_result_dialog())
-
-        # 奖品图片开关
-        self.pumping_reward_show_image_switch = SwitchButton()
-        self.pumping_reward_show_image_switch.setOnText("开启")
-        self.pumping_reward_show_image_switch.setOffText("关闭")
-        self.pumping_reward_show_image_switch.checkedChanged.connect(self.save_settings)
-        self.pumping_reward_show_image_switch.setFont(QFont(load_custom_font(), 12))
-
-        # 奖品图片文件夹
-        self.pumping_reward_image_path_button = PushButton("奖品图片文件夹")
-        self.pumping_reward_image_path_button.setFont(QFont(load_custom_font(), 12))
-        self.pumping_reward_image_path_button.clicked.connect(lambda: self.open_image_path())
-
         # 添加组件到分组中
         # ===== 抽取模式设置 =====
         self.addGroup(get_theme_icon("ic_fluent_arrow_sync_20_filled"), "抽取模式", "配置抽取奖品的基本模式", self.pumping_reward_Draw_comboBox)
@@ -196,31 +95,11 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
         # ===== 显示格式设置 =====
         self.addGroup(get_theme_icon("ic_fluent_text_font_size_20_filled"), "字体大小", "调整抽取结果显示的字体大小", self.pumping_reward_font_size_SpinBox)
         self.addGroup(get_theme_icon("ic_fluent_people_eye_20_filled"), "显示格式", "配置抽取结果的展示格式", self.pumping_reward_display_format_comboBox)
-        
-        # ===== 颜色设置 =====
-        self.addGroup(get_theme_icon("ic_fluent_people_eye_20_filled"), "动画/结果颜色", "设置动画和结果的字体颜色", self.pumping_reward_student_name_color_comboBox)
-        self.addGroup(get_theme_icon("ic_fluent_people_eye_20_filled"), "动画颜色", "自定义动画过程的字体颜色", self.pumping_reward_animation_color_fixed_dialog_button)
-        self.addGroup(get_theme_icon("ic_fluent_people_eye_20_filled"), "结果颜色", "自定义最终结果的字体颜色", self.pumping_reward_result_color_fixed_dialog_button)
 
         # ===== 动画设置 =====
         self.addGroup(get_theme_icon("ic_fluent_calendar_video_20_filled"), "动画模式", "选择抽取时的动画播放模式", self.pumping_reward_Animation_comboBox)
         self.addGroup(get_theme_icon("ic_fluent_calendar_video_20_filled"), "动画间隔", "调整动画播放的时间间隔(50-2000ms，适用于1、2号动画)", self.pumping_reward_animation_interval_SpinBox)
         self.addGroup(get_theme_icon("ic_fluent_calendar_video_20_filled"), "自动播放次数", "设置动画自动播放的次数(1-200次，仅适用于2号动画)", self.pumping_reward_animation_auto_play_SpinBox)
-        
-        # ===== 图片显示设置 =====
-        self.addGroup(get_theme_icon("ic_fluent_people_eye_20_filled"), "奖品图片", "控制是否显示奖品图片", self.pumping_reward_show_image_switch)
-        self.addGroup(get_theme_icon("ic_fluent_people_eye_20_filled"), "奖品图片文件夹", "打开奖品图片目录(图片名需与奖品名对应，无图则显示首字)", self.pumping_reward_image_path_button)
-        
-        # ===== 音乐设置 =====
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "动画音乐", "开启或关闭抽取动画的背景音乐", self.pumping_reward_Animation_music_switch)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "结果音乐", "开启或关闭抽取结果的背景音乐", self.pumping_reward_result_music_switch)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "动画音乐文件夹", "打开动画音乐目录(支持mp3、wav、flac、ogg格式)", self.pumping_reward_Animation_music_path_button)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "结果音乐文件夹", "打开结果音乐目录(支持mp3、wav、flac、ogg格式)", self.pumping_reward_result_music_path_button)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "动画音乐音量", "调整动画背景音乐的播放音量(0-100)", self.pumping_reward_Animation_music_volume_SpinBox)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "结果音乐音量", "调整结果背景音乐的播放音量(0-100)", self.pumping_reward_result_music_volume_SpinBox)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "动画/结果音乐渐入时间", "设置音乐渐入效果的时间长度(0-1000ms)", self.pumping_reward_music_fade_in_SpinBox)
-        self.addGroup(get_theme_icon("ic_fluent_music_note_2_20_filled"), "动画/结果音乐渐出时间", "设置音乐渐出效果的时间长度(0-1000ms)", self.pumping_reward_music_fade_out_SpinBox)
-
         self.load_settings()  # 加载设置
         self.save_settings()  # 保存设置
 
@@ -263,23 +142,9 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
     def open_folder(self, folder_path):
         """跨平台打开文件夹的方法"""
         try:
-            if os.name == 'nt':  # Windows系统
-                os.startfile(folder_path)
-            elif os.name == 'posix':  # Linux/Mac系统
-                if os.uname().sysname == 'Darwin':  # macOS
-                    subprocess.run(['open', folder_path])
-                else:  # Linux
-                    subprocess.run(['xdg-open', folder_path])
-            else:
-                # 使用Qt的跨平台方案作为备选
-                QDesktopServices.openUrl(QUrl.fromLocalFile(folder_path))
+            QDesktopServices.openUrl(QUrl.fromLocalFile(folder_path))
         except Exception as e:
             logger.error(f"打开文件夹失败: {e}")
-            # 最后尝试使用Qt方案
-            try:
-                QDesktopServices.openUrl(QUrl.fromLocalFile(folder_path))
-            except Exception as e2:
-                logger.error(f"使用Qt打开文件夹也失败: {e2}")
 
     def apply_font_size(self):
         try:
@@ -378,15 +243,7 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
                     self.pumping_reward_Animation_comboBox.setCurrentIndex(animation_mode)
                     self.pumping_reward_animation_interval_SpinBox.setValue(animation_interval)
                     self.pumping_reward_animation_auto_play_SpinBox.setValue(animation_auto_play)
-                    self.pumping_reward_Animation_music_switch.setChecked(animation_music_enabled)
-                    self.pumping_reward_result_music_switch.setChecked(result_music_enabled)
-                    self.pumping_reward_Animation_music_volume_SpinBox.setValue(animation_music_volume)
-                    self.pumping_reward_result_music_volume_SpinBox.setValue(result_music_volume)
-                    self.pumping_reward_music_fade_in_SpinBox.setValue(music_fade_in)
-                    self.pumping_reward_music_fade_out_SpinBox.setValue(music_fade_out)
                     self.pumping_reward_display_format_comboBox.setCurrentIndex(display_format)
-                    self.pumping_reward_student_name_color_comboBox.setCurrentIndex(animation_color)
-                    self.pumping_reward_show_image_switch.setChecked(show_reward_image)
             else:
                 self.pumping_reward_Draw_comboBox.setCurrentIndex(self.default_settings["draw_mode"])
                 self.pumping_reward_mode_Draw_comboBox.setCurrentIndex(self.default_settings["draw_pumping"])
@@ -394,16 +251,8 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
                 self.pumping_reward_Animation_comboBox.setCurrentIndex(self.default_settings["animation_mode"])
                 self.pumping_reward_animation_interval_SpinBox.setValue(self.default_settings["animation_interval"])
                 self.pumping_reward_animation_auto_play_SpinBox.setValue(self.default_settings["animation_auto_play"])
-                self.pumping_reward_Animation_music_switch.setChecked(self.default_settings["animation_music_enabled"])
-                self.pumping_reward_result_music_switch.setChecked(self.default_settings["result_music_enabled"])
-                self.pumping_reward_Animation_music_volume_SpinBox.setValue(self.default_settings["animation_music_volume"])
-                self.pumping_reward_result_music_volume_SpinBox.setValue(self.default_settings["result_music_volume"])
-                self.pumping_reward_music_fade_in_SpinBox.setValue(self.default_settings["music_fade_in"])
-                self.pumping_reward_music_fade_out_SpinBox.setValue(self.default_settings["music_fade_out"])
                 self.pumping_reward_Animation_comboBox.setCurrentIndex(self.default_settings["animation_mode"])
                 self.pumping_reward_display_format_comboBox.setCurrentIndex(self.default_settings["display_format"])
-                self.pumping_reward_student_name_color_comboBox.setCurrentIndex(self.default_settings["animation_color"])
-                self.pumping_reward_show_image_switch.setChecked(self.default_settings["show_reward_image"])
                 self.save_settings()
         except Exception as e:
             logger.error(f"加载设置时出错: {e}")
@@ -413,15 +262,7 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
             self.pumping_reward_Animation_comboBox.setCurrentIndex(self.default_settings["animation_mode"])
             self.pumping_reward_animation_interval_SpinBox.setValue(self.default_settings["animation_interval"])
             self.pumping_reward_animation_auto_play_SpinBox.setValue(self.default_settings["animation_auto_play"])
-            self.pumping_reward_Animation_music_switch.setChecked(self.default_settings["animation_music_enabled"])
-            self.pumping_reward_result_music_switch.setChecked(self.default_settings["result_music_enabled"])
-            self.pumping_reward_Animation_music_volume_SpinBox.setValue(self.default_settings["animation_music_volume"])
-            self.pumping_reward_result_music_volume_SpinBox.setValue(self.default_settings["result_music_volume"])
-            self.pumping_reward_music_fade_in_SpinBox.setValue(self.default_settings["music_fade_in"])
-            self.pumping_reward_music_fade_out_SpinBox.setValue(self.default_settings["music_fade_out"])
             self.pumping_reward_display_format_comboBox.setCurrentIndex(self.default_settings["display_format"])
-            self.pumping_reward_student_name_color_comboBox.setCurrentIndex(self.default_settings["animation_color"])
-            self.pumping_reward_show_image_switch.setChecked(self.default_settings["show_reward_image"])
 
             self.save_settings()
     
@@ -446,15 +287,7 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
         pumping_reward_settings["animation_mode"] = self.pumping_reward_Animation_comboBox.currentIndex()
         pumping_reward_settings["animation_interval"] = self.pumping_reward_animation_interval_SpinBox.value()
         pumping_reward_settings["animation_auto_play"] = self.pumping_reward_animation_auto_play_SpinBox.value()
-        pumping_reward_settings["animation_music_enabled"] = self.pumping_reward_Animation_music_switch.isChecked()
-        pumping_reward_settings["result_music_enabled"] = self.pumping_reward_result_music_switch.isChecked()
-        pumping_reward_settings["animation_music_volume"] = self.pumping_reward_Animation_music_volume_SpinBox.value()
-        pumping_reward_settings["result_music_volume"] = self.pumping_reward_result_music_volume_SpinBox.value()
-        pumping_reward_settings["music_fade_in"] = self.pumping_reward_music_fade_in_SpinBox.value()
-        pumping_reward_settings["music_fade_out"] = self.pumping_reward_music_fade_out_SpinBox.value()
         pumping_reward_settings["display_format"] = self.pumping_reward_display_format_comboBox.currentIndex()
-        pumping_reward_settings["animation_color"] = self.pumping_reward_student_name_color_comboBox.currentIndex()
-        pumping_reward_settings["show_reward_image"] = self.pumping_reward_show_image_switch.isChecked()
 
         # 保存字体大小
         try:
