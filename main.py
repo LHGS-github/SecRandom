@@ -543,13 +543,6 @@ def log_software_info():
     for key, value in software_info.items():
         logger.info(f"软件{key}: {value}")
 
-def clean_expired_data():
-    """清理过期历史记录"""
-    from app.common.history_cleaner import clean_expired_history, clean_expired_reward_history
-    clean_expired_history()
-    clean_expired_reward_history()
-    logger.info("已清理过期历史记录")
-
 async def create_main_window_async():
     """异步创建主窗口实例并根据设置决定是否显示窗口"""
     # 检查是否有启动窗口线程
@@ -641,10 +634,6 @@ async def async_init_application():
     if 'startup_thread' in globals() and startup_thread is not None and startup_thread.isRunning():
         startup_thread.next_step("正在加载配置文件...")
     log_software_info()
-
-    if 'startup_thread' in globals() and startup_thread is not None and startup_thread.isRunning():
-        startup_thread.set_step(4, "正在清理历史记录...")
-    clean_expired_data()
 
     # 异步执行注册URL协议
     await async_register_url_protocol()

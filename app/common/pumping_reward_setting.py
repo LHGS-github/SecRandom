@@ -214,29 +214,11 @@ class pumping_reward_SettinsCard(GroupHeaderCardWidget):
                     animation_interval = pumping_reward_settings.get("animation_interval", self.default_settings["animation_interval"])
                     animation_auto_play = pumping_reward_settings.get("animation_auto_play", self.default_settings["animation_auto_play"])
 
-                    # 加载动画音乐设置
-                    animation_music_enabled = pumping_reward_settings.get("animation_music_enabled", self.default_settings["animation_music_enabled"])
-                    result_music_enabled = pumping_reward_settings.get("result_music_enabled", self.default_settings["result_music_enabled"])
-                    animation_music_volume = pumping_reward_settings.get("animation_music_volume", self.default_settings["animation_music_volume"])
-                    result_music_volume = pumping_reward_settings.get("result_music_volume", self.default_settings["result_music_volume"])
-                    music_fade_in = pumping_reward_settings.get("music_fade_in", self.default_settings["music_fade_in"])
-                    music_fade_out = pumping_reward_settings.get("music_fade_out", self.default_settings["music_fade_out"])
-
                     # 显示格式
                     display_format = pumping_reward_settings.get("display_format", self.default_settings["display_format"])
                     if display_format < 0 or display_format >= self.pumping_reward_display_format_comboBox.count():
                         logger.error(f"无效的显示格式索引: {display_format}")
                         display_format = self.default_settings["display_format"]
-
-                    # 动画/结果颜色
-                    animation_color = pumping_reward_settings.get("animation_color", self.default_settings["animation_color"])
-                    if animation_color < 0 or animation_color >= self.pumping_reward_student_name_color_comboBox.count():
-                        logger.error(f"无效的动画/结果颜色索引: {animation_color}")
-                        animation_color = self.default_settings["animation_color"]
-
-                    # 奖品图片显示
-                    show_reward_image = pumping_reward_settings.get("show_reward_image", self.default_settings["show_reward_image"])
-                    
                     self.pumping_reward_Draw_comboBox.setCurrentIndex(draw_mode)
                     self.pumping_reward_mode_Draw_comboBox.setCurrentIndex(draw_pumping)
                     self.pumping_reward_font_size_SpinBox.setValue(font_size)

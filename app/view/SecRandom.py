@@ -30,7 +30,6 @@ from app.common.path_utils import open_file, ensure_dir
 from app.view.settings import settings_Window
 from app.view.main_page.pumping_people import pumping_people
 from app.view.main_page.pumping_reward import pumping_reward
-from app.view.main_page.history_handoff_setting import history_handoff_setting
 from app.view.levitation import LevitationWindow
 from app.view.settings_page.about_setting import about
 from app.common.about import ContributorDialog, DonationDialog
@@ -861,15 +860,6 @@ class Window(MSFluentWindow):
         # 创建各个子界面
         # 抽象成函数，提升可读性喵~
         _create_interface(
-            attr_name='history_handoff_settingInterface',
-            class_type=history_handoff_setting,
-            sidebar_key='main_window_history_switch',
-            default_value=1,
-            object_name='history_handoff_settingInterface',
-            log_name='历史交接设置',
-            create_on_error=True
-        )
-        _create_interface(
             attr_name='pumping_peopleInterface',
             class_type=pumping_people,
             sidebar_key='pumping_floating_side',
@@ -942,59 +932,6 @@ class Window(MSFluentWindow):
                 self.addSubInterface(self.pumping_peopleInterface, get_theme_icon("ic_fluent_people_community_20_filled"), '点名', position=NavigationItemPosition.TOP)
             if self.pumping_rewardInterface is not None:
                 self.addSubInterface(self.pumping_rewardInterface, get_theme_icon("ic_fluent_reward_20_filled"), '抽奖', position=NavigationItemPosition.TOP)
-
-        try:
-            # 添加单词PK界面导航项
-            vocabulary_side = sidebar_settings.get('main_window_side_switch', 2)
-            if vocabulary_side == 1:
-                if self.vocabulary_learningInterface is not None:
-                    self.addSubInterface(self.vocabulary_learningInterface, get_theme_icon("ic_fluent_text_whole_word_20_filled"), '单词PK', position=NavigationItemPosition.BOTTOM)
-                    # logger.info("'单词PK'界面已放置在底部导航栏")
-                else:
-                    logger.error("'单词PK'界面未创建，无法添加到导航栏")
-            elif vocabulary_side == 2:
-                logger.info("'单词PK'界面已设置为不显示")
-            else:
-                if self.vocabulary_learningInterface is not None:
-                    self.addSubInterface(self.vocabulary_learningInterface, get_theme_icon("ic_fluent_text_whole_word_20_filled"), '单词PK', position=NavigationItemPosition.TOP)
-                    # logger.info("'单词PK'界面已放置在顶部导航栏")
-                else:
-                    logger.error("'单词PK'界面未创建，无法添加到导航栏")
-        except Exception as e:
-            if self.vocabulary_learningInterface is not None:
-                self.addSubInterface(self.vocabulary_learningInterface, get_theme_icon("ic_fluent_text_whole_word_20_filled"), '单词PK', position=NavigationItemPosition.BOTTOM)
-            logger.error(f"加载单词PK界面导航项失败: {e}")
-
-        # 添加历史记录导航项
-        try:
-            history_side = sidebar_settings.get('main_window_history_switch', 1)
-            if history_side == 1:
-                if self.history_handoff_settingInterface is not None:
-                    # 为历史记录导航项添加点击事件处理器
-                    history_item = self.addSubInterface(self.history_handoff_settingInterface, get_theme_icon("ic_fluent_chat_history_20_filled"), '历史记录', position=NavigationItemPosition.BOTTOM)
-                    # 点击历史记录导航项时切换到历史记录界面
-                    history_item.clicked.connect(lambda: self.switchTo(self.history_handoff_settingInterface))
-                    # logger.info("'历史记录'导航项已放置在底部导航栏")
-                else:
-                    logger.error("'历史记录'界面未创建，无法添加到导航栏")
-            elif history_side == 2:
-                logger.info("'历史记录'导航项已设置为不显示")
-            else:
-                if self.history_handoff_settingInterface is not None:
-                    # 为历史记录导航项添加点击事件处理器
-                    history_item = self.addSubInterface(self.history_handoff_settingInterface, get_theme_icon("ic_fluent_chat_history_20_filled"), '历史记录', position=NavigationItemPosition.TOP)
-                    # 点击历史记录导航项时切换到历史记录界面
-                    history_item.clicked.connect(lambda: self.switchTo(self.history_handoff_settingInterface))
-                    # logger.info("'历史记录'导航项已放置在顶部导航栏")
-                else:
-                    logger.error("'历史记录'界面未创建，无法添加到导航栏")
-        except Exception as e:
-            logger.error(f"加载历史记录导航项失败: {e}")
-            # 默认添加到底部导航栏
-            if self.history_handoff_settingInterface is not None:
-                history_item = self.addSubInterface(self.history_handoff_settingInterface, get_theme_icon("ic_fluent_chat_history_20_filled"), '历史记录', position=NavigationItemPosition.BOTTOM)
-                # 点击历史记录导航项时切换到历史记录界面
-                history_item.clicked.connect(lambda: self.switchTo(self.history_handoff_settingInterface))
 
         self.addSubInterface(self.about_settingInterface, get_theme_icon("ic_fluent_info_20_filled"), '关于', position=NavigationItemPosition.BOTTOM)
 

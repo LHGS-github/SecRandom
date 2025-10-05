@@ -14,7 +14,6 @@ import random
 
 # 导入子页面
 from app.view.settings_page.more_setting import more_setting
-from app.view.settings_page.Changeable_history_handoff_setting import changeable_history_handoff_setting
 from app.view.settings_page.password_setting import password_set
 from app.view.settings_page.about_setting import about
 from app.view.settings_page.custom_setting import custom_setting
@@ -96,27 +95,6 @@ class settings_Window(MSFluentWindow):
             logger.error(f"创建抽取设置界面失败: {e}")
             self.pumping_handoff_settingInterface = None
 
-        # 根据设置决定是否创建"历史记录设置"界面
-        try:
-            settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                sidebar_settings = settings.get('sidebar', {})
-                history_settings_switch = sidebar_settings.get('show_history_settings_switch', 1)
-                
-                if history_settings_switch != 2:  # 不为"不显示"时才创建界面
-                    self.changeable_history_handoff_settingInterface = changeable_history_handoff_setting(self)
-                    self.changeable_history_handoff_settingInterface.setObjectName("changeable_history_handoff_settingInterface")
-                    logger.info("历史记录设置界面创建成功")
-                else:
-                    logger.info("历史记录设置界面已设置为不创建")
-                    self.changeable_history_handoff_settingInterface = None
-        except Exception as e:
-            logger.error(f"读取历史记录设置界面设置失败: {e}, 默认创建界面")
-            self.changeable_history_handoff_settingInterface = changeable_history_handoff_setting(self)
-            self.changeable_history_handoff_settingInterface.setObjectName("changeable_history_handoff_settingInterface")
-            logger.info("历史记录设置界面创建成功")
-
         try:
             self.about_settingInterface = about(self)
             self.about_settingInterface.setObjectName("about_settingInterface")
@@ -186,36 +164,6 @@ class settings_Window(MSFluentWindow):
             logger.error(f"加载安全设置导航项失败: {e}")
             if self.password_setInterface is not None:
                 self.addSubInterface(self.password_setInterface, get_theme_icon("ic_fluent_shield_keyhole_20_filled"), '安全设置', position=NavigationItemPosition.BOTTOM)
-
-        # 添加历史记录设置导航项
-        try:
-            settings_path = path_manager.get_settings_path('custom_settings.json')
-            with open_file(settings_path, 'r', encoding='utf-8') as f:
-                settings = json.load(f)
-                sidebar_settings = settings.get('sidebar', {})
-                history_settings_switch = sidebar_settings.get('show_history_settings_switch', 1)
-                
-                if history_settings_switch == 1:
-                    if self.changeable_history_handoff_settingInterface is not None:
-                        history_item = self.addSubInterface(self.changeable_history_handoff_settingInterface, get_theme_icon("ic_fluent_chat_history_20_filled"), '历史记录', position=NavigationItemPosition.BOTTOM)
-                        history_item.clicked.connect(lambda: self.changeable_history_handoff_settingInterface.pumping_people_card.load_data())
-                        # logger.info("历史记录设置导航项已放置在底部导航栏")
-                    else:
-                        logger.error("历史记录设置界面未创建，无法添加到导航栏")
-                elif history_settings_switch == 2:
-                    logger.info("历史记录设置导航项已设置为不显示")
-                else:
-                    if self.changeable_history_handoff_settingInterface is not None:
-                        history_item = self.addSubInterface(self.changeable_history_handoff_settingInterface, get_theme_icon("ic_fluent_chat_history_20_filled"), '历史记录', position=NavigationItemPosition.TOP)
-                        history_item.clicked.connect(lambda: self.changeable_history_handoff_settingInterface.pumping_people_card.load_data())
-                        # logger.info("历史记录设置导航项已放置在顶部导航栏")
-                    else:
-                        logger.error("历史记录设置界面未创建，无法添加到导航栏")
-        except Exception as e:
-            logger.error(f"加载历史记录设置导航项失败: {e}")
-            if self.changeable_history_handoff_settingInterface is not None:
-                history_item = self.addSubInterface(self.changeable_history_handoff_settingInterface, get_theme_icon("ic_fluent_chat_history_20_filled"), '历史记录', position=NavigationItemPosition.BOTTOM)
-                history_item.clicked.connect(lambda: self.changeable_history_handoff_settingInterface.pumping_people_card.load_data())
 
         if self.about_settingInterface is not None:
             self.addSubInterface(self.about_settingInterface, get_theme_icon("ic_fluent_info_20_filled"), '关于', position=NavigationItemPosition.BOTTOM)
